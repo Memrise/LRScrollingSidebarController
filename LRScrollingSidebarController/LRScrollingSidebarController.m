@@ -46,6 +46,7 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
 
 #ifdef __IPHONE_7_0
 @property (nonatomic, weak) UIView *snapshotView;
+- (UIView*) snapshotMainViewControllerViewAfterUpdates:(BOOL) afterUpdates;
 #endif
 
 @end
@@ -170,6 +171,30 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
     [self.view bringSubviewToFront:self.scrollView];
     
     [self.mainViewController.view addSubview:self.overlay];
+
+#if __IPHONE_7_0
+    if (__LRSSC_IOS7_SYS && self.snapshotView) {
+        // snapshot the new main view
+        BOOL leftVisible = self.visibleController == self.leftViewController;
+        BOOL rightVisible = self.visibleController == self.rightViewController;
+
+        [self.snapshotView removeFromSuperview];
+        self.snapshotView = nil;
+
+        [self showMainViewControllerAnimated:NO];
+        [self setNeedsStatusBarAppearanceUpdate];
+
+        self.snapshotView = [self snapshotMainViewControllerViewAfterUpdates:YES];
+
+        if (leftVisible) {
+            [self showLeftViewControllerAnimated:NO];
+        } else if (rightVisible) {
+            [self showRightViewControllerAnimated:NO];
+        }
+
+        [self setNeedsStatusBarAppearanceUpdate];
+    }
+#endif
 }
 
 - (void)replaceRightViewController:(ISSidePanelController)rightViewController
@@ -291,10 +316,7 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
 #if __IPHONE_7_0
     if (__LRSSC_IOS7_SYS) {
         if (self.visibleController == self.mainViewController) {
-            UIView *snapshot = [[UIScreen mainScreen] snapshotViewAfterScreenUpdates:NO];
-            [self.mainViewController.view addSubview:snapshot];
-            self.snapshotView = snapshot;
-            [self setNeedsStatusBarAppearanceUpdate];
+            self.snapshotView = [self snapshotMainViewControllerViewAfterUpdates:NO];
         }
     }
 #endif
@@ -449,6 +471,16 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
 #pragma mark iOS 7 Status bar support
 
 #ifdef __IPHONE_7_0
+
+- (UIView*) snapshotMainViewControllerViewAfterUpdates:(BOOL) afterUpdates {
+    UIView *snapshot = [[UIScreen mainScreen] snapshotViewAfterScreenUpdates:afterUpdates];
+    snapshot.userInteractionEnabled = NO;
+    [self.mainViewController.view addSubview:snapshot];
+    self.snapshotView = snapshot;
+    [self setNeedsStatusBarAppearanceUpdate];
+    return snapshot;
+}
+
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation {
     return UIStatusBarAnimationNone;
 }
