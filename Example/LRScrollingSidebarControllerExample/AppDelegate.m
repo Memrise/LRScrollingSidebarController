@@ -49,6 +49,7 @@
     rootViewController.mainViewControllerOverlayColor = [UIColor cyanColor];
     rootViewController.mainViewControllerOverlayMaxAlpha = 0.7;
     rootViewController.delegate = self;
+    rootViewController.initialState = LRSidebarScrollViewStateCenter;
     
     self.window.rootViewController = rootViewController;
     
@@ -57,7 +58,7 @@
 }
 
 #pragma mark - LRScrollingSidebarControllerDelegate
-
+/*
 - (void)scrollingSidebarController:(LRScrollingSidebarController *)scrollingSidebarController
 willBeginDraggingMainPanelWithScrollView:(UIScrollView *)scrollView
 {
@@ -80,7 +81,7 @@ didEndDraggingMainPanelWithScrollView:(UIScrollView *)scrollView
   didEndDeceleratingWithScrollView:(UIScrollView *)scrollView
 {
     NSLog(@"%@", NSStringFromSelector(_cmd));
-}
+}*/
 
 #pragma mark - App Delegate
 

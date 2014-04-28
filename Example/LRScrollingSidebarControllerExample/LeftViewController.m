@@ -42,7 +42,7 @@
 
 - (void)controllerIsVisible:(BOOL)controllerIsVisible
 {
-    NSLog(@"Left view controller is visible: %d", controllerIsVisible);
+   // NSLog(@"Left view controller is visible: %d", controllerIsVisible);
 }
 
 @end

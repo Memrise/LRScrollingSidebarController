@@ -25,6 +25,10 @@
 #import "UIViewController+LRScrollingSidebarController.h"
 #import "LRScrollingSidebarControllerStrategy.h"
 
+#ifdef __IPHONE_7_0
+#define __LRSSC_IOS7_SYS ([UIDevice currentDevice].systemVersion.doubleValue >= 7.0)
+#endif
+
 NSString *const kScrollViewWillBeginDraggingNotification = @"kScrollViewWillBeginDraggingNotification";
 NSString *const kScrollViewDidEndDraggingNotification = @"kScrollViewDidEndDraggingNotification";
 NSString *const kScrollViewDidEndDeceleratingNotification = @"kScrollViewDidEndDeceleratingNotification";
@@ -39,6 +43,10 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
 @property (nonatomic, strong) UIView *overlay;
 
 @property (nonatomic, strong) id<LRScrollingSidebarControllerStrategy> strategy;
+
+#ifdef __IPHONE_7_0
+@property (nonatomic, weak) UIView *snapshotView;
+#endif
 
 @end
 
@@ -279,7 +287,18 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:kScrollViewWillBeginDraggingNotification
                                                         object:self.scrollView];
-    
+
+#if __IPHONE_7_0
+    if (__LRSSC_IOS7_SYS) {
+        if (self.visibleController == self.mainViewController) {
+            UIView *snapshot = [[UIScreen mainScreen] snapshotViewAfterScreenUpdates:NO];
+            [self.mainViewController.view addSubview:snapshot];
+            self.snapshotView = snapshot;
+            [self setNeedsStatusBarAppearanceUpdate];
+        }
+    }
+#endif
+
     if ([self.delegate respondsToSelector:
          @selector(scrollingSidebarController:willBeginDraggingMainPanelWithScrollView:)])
     {
@@ -360,6 +379,9 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:kScrollViewDidEndDraggingNotification
                                                         object:self.scrollView];
+
+
+
     if ([self.delegate respondsToSelector:
          @selector(scrollingSidebarController:didEndDraggingMainPanelWithScrollView:)])
     {
@@ -376,6 +398,15 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kScrollViewDidEndDeceleratingNotification
                                                         object:self.scrollView];
+
+#if __IPHONE_7_0
+    if (__LRSSC_IOS7_SYS) {
+        if (self.visibleController == self.mainViewController) {
+            [self.snapshotView removeFromSuperview];
+            [self setNeedsStatusBarAppearanceUpdate];
+        }
+    }
+#endif
     
     if ([self.delegate respondsToSelector:
          @selector(scrollingSidebarController:didEndDeceleratingWithScrollView:)])
@@ -415,4 +446,18 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
     return UIInterfaceOrientationMaskPortrait;
 }
 
+#pragma mark iOS 7 Status bar support
+
+#ifdef __IPHONE_7_0
+- (UIStatusBarAnimation)preferredStatusBarUpdateAnimation {
+    return UIStatusBarAnimationNone;
+}
+
+- (BOOL)prefersStatusBarHidden {
+    return !!self.snapshotView;
+}
+#endif
+
 @end
+
+#undef __LRSSC_IOS

@@ -70,7 +70,7 @@
 
 - (void)controllerIsVisible:(BOOL)controllerIsVisible
 {
-    NSLog(@"Main view controller is visible: %d", controllerIsVisible);
+  //  NSLog(@"Main view controller is visible: %d", controllerIsVisible);
 }
 
 @end

@@ -55,7 +55,7 @@
 
 - (void)controllerIsVisible:(BOOL)controllerIsVisible
 {
-    NSLog(@"Right view controller is visible: %d", controllerIsVisible);
+  //  NSLog(@"Right view controller is visible: %d", controllerIsVisible);
 }
 
 @end
