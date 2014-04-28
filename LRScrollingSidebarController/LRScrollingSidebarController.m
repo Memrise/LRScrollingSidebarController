@@ -425,6 +425,7 @@ static CGFloat const kMainViewControllerOverlayMaxAlpha = 0.9f;
     if (__LRSSC_IOS7_SYS) {
         if (self.visibleController == self.mainViewController) {
             [self.snapshotView removeFromSuperview];
+            self.snapshotView = nil;
             [self setNeedsStatusBarAppearanceUpdate];
         }
     }
